@@ -168,7 +168,25 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
   if (!person) notFound()
 
   const [unlocked, setUnlocked] = useState(false)
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
   const matrixCanvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const wedding = new Date('2027-07-16T17:00:00')
+    const tick = () => {
+      const diff = wedding.getTime() - Date.now()
+      if (diff <= 0) return
+      setCountdown({
+        days:    Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours:   Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / 1000 / 60) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      })
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [])
   const [passwordInput, setPasswordInput] = useState('')
   const [passwordError, setPasswordError] = useState(false)
   const [visibleLines, setVisibleLines] = useState<string[]>([])
@@ -503,18 +521,72 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
 
         .lock-screen {
           display: flex; flex-direction: column; align-items: center; justify-content: center;
-          min-height: 100vh; padding: 2rem; animation: fadeIn 0.4s ease;
+          min-height: 100vh; padding: 2rem; gap: 0;
         }
-        .lock-icon { font-size: 2rem; margin-bottom: 1.5rem; opacity: 0.6; }
-        .lock-label {
-          font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase;
-          color: var(--muted); margin-bottom: 0.6rem;
+
+        .lock-top {
+          display: flex; flex-direction: column; align-items: center;
+          animation: fadeUp 0.7s 0.1s ease both;
         }
-        .lock-title {
-          font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300;
-          color: var(--text); margin-bottom: 2rem; text-align: center;
+        .lock-icon { font-size: 1.8rem; margin-bottom: 1rem; opacity: 0.5; }
+        .lock-eyebrow {
+          font-size: 0.55rem; letter-spacing: 0.35em; text-transform: uppercase;
+          color: var(--muted); margin-bottom: 0.5rem;
         }
-        .lock-form { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; max-width: 320px; }
+        .lock-date {
+          font-family: 'Cormorant Garamond', serif; font-style: italic;
+          font-size: clamp(1.4rem, 4vw, 2rem); color: var(--gold); margin-bottom: 0.3rem;
+        }
+        .lock-venue {
+          font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+          color: var(--muted); margin-bottom: 2.5rem;
+        }
+
+        .lock-countdown {
+          display: flex; gap: 2rem; margin-bottom: 2.5rem; flex-wrap: wrap; justify-content: center;
+          animation: fadeUp 0.7s 0.25s ease both;
+        }
+        .lock-cd-item { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+        .lock-cd-num {
+          font-family: 'JetBrains Mono', monospace; font-size: clamp(1.6rem, 5vw, 2.2rem);
+          color: var(--text); line-height: 1;
+          animation: flicker 8s infinite;
+        }
+        .lock-cd-label {
+          font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+        }
+        .lock-cd-sep {
+          font-family: 'JetBrains Mono', monospace; font-size: 1.8rem;
+          color: var(--dim); align-self: center; padding-bottom: 0.8rem;
+        }
+        @keyframes flicker {
+          0%,95%,100% { opacity: 1; }
+          96% { opacity: 0.4; }
+          97% { opacity: 1; }
+          98% { opacity: 0.6; }
+          99% { opacity: 1; }
+        }
+
+        .lock-divider {
+          width: 100%; max-width: 320px; height: 0.5px; background: var(--border);
+          margin-bottom: 2rem; animation: fadeUp 0.7s 0.35s ease both;
+        }
+        .lock-access {
+          font-size: 0.55rem; letter-spacing: 0.3em; text-transform: uppercase;
+          color: var(--muted); margin-bottom: 1.2rem;
+          animation: fadeUp 0.7s 0.4s ease both;
+        }
+        .lock-typing {
+          font-size: 0.75rem; color: var(--green); letter-spacing: 0.05em;
+          margin-bottom: 1.5rem; min-height: 1.2rem;
+          animation: fadeUp 0.7s 0.45s ease both;
+        }
+        .lock-typing::after { content: '█'; animation: blink 1s step-end infinite; }
+
+        .lock-form {
+          display: flex; flex-direction: column; gap: 0.75rem; width: 100%; max-width: 320px;
+          animation: fadeUp 0.7s 0.5s ease both;
+        }
         .lock-input {
           background: var(--surface); border: 0.5px solid var(--border); padding: 0.9rem 1.2rem;
           color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
@@ -538,9 +610,39 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
 
       {!unlocked ? (
         <div className="lock-screen">
-          <div className="lock-icon">🔒</div>
-          <div className="lock-label">Access Required</div>
-          <div className="lock-title">Enter the password to continue</div>
+          <div className="lock-top">
+            <div className="lock-icon">🔒</div>
+            <div className="lock-eyebrow">You have been selected</div>
+            <div className="lock-date">Kenny & Jeanne</div>
+            <div className="lock-venue">July 16, 2027 · ThreePetals · Huntington Beach, CA</div>
+          </div>
+
+          <div className="lock-countdown">
+            <div className="lock-cd-item">
+              <span className="lock-cd-num">{countdown.days}</span>
+              <span className="lock-cd-label">Days</span>
+            </div>
+            <div className="lock-cd-sep">:</div>
+            <div className="lock-cd-item">
+              <span className="lock-cd-num">{String(countdown.hours).padStart(2, '0')}</span>
+              <span className="lock-cd-label">Hours</span>
+            </div>
+            <div className="lock-cd-sep">:</div>
+            <div className="lock-cd-item">
+              <span className="lock-cd-num">{String(countdown.minutes).padStart(2, '0')}</span>
+              <span className="lock-cd-label">Minutes</span>
+            </div>
+            <div className="lock-cd-sep">:</div>
+            <div className="lock-cd-item">
+              <span className="lock-cd-num">{String(countdown.seconds).padStart(2, '0')}</span>
+              <span className="lock-cd-label">Seconds</span>
+            </div>
+          </div>
+
+          <div className="lock-divider" />
+          <div className="lock-access">// Access Required</div>
+          <div className="lock-typing">&gt; Awaiting authentication...</div>
+
           <form className="lock-form" onSubmit={handlePassword}>
             <input
               className="lock-input"
