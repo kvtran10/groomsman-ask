@@ -167,6 +167,9 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
 
   if (!person) notFound()
 
+  const [unlocked, setUnlocked] = useState(false)
+  const [passwordInput, setPasswordInput] = useState('')
+  const [passwordError, setPasswordError] = useState(false)
   const [visibleLines, setVisibleLines] = useState<string[]>([])
   const [showPrompt, setShowPrompt] = useState(false)
   const [answer, setAnswer] = useState<'yes' | 'no' | null>(null)
@@ -174,6 +177,17 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
   const [noPos, setNoPos] = useState<{ x: number; y: number } | null>(null)
   const terminalRef = useRef<HTMLDivElement>(null)
   const noBtnRef = useRef<HTMLButtonElement>(null)
+
+  const handlePassword = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (passwordInput.toLowerCase() === 'reinakumo') {
+      setUnlocked(true)
+      setPasswordError(false)
+    } else {
+      setPasswordError(true)
+      setPasswordInput('')
+    }
+  }
 
   useEffect(() => {
     const isTouchDevice = () => window.matchMedia('(pointer: coarse)').matches
@@ -452,7 +466,61 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
           .prompt-btns { flex-direction: column; }
           .btn { text-align: center; }
         }
+
+        .lock-screen {
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          min-height: 100vh; padding: 2rem; animation: fadeIn 0.4s ease;
+        }
+        .lock-icon { font-size: 2rem; margin-bottom: 1.5rem; opacity: 0.6; }
+        .lock-label {
+          font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase;
+          color: var(--muted); margin-bottom: 0.6rem;
+        }
+        .lock-title {
+          font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300;
+          color: var(--text); margin-bottom: 2rem; text-align: center;
+        }
+        .lock-form { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; max-width: 320px; }
+        .lock-input {
+          background: var(--surface); border: 0.5px solid var(--border); padding: 0.9rem 1.2rem;
+          color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
+          outline: none; border-radius: 6px; letter-spacing: 0.15em; text-align: center;
+          transition: border-color 0.2s;
+        }
+        .lock-input:focus { border-color: var(--gold); }
+        .lock-input::placeholder { color: var(--muted); letter-spacing: 0.1em; }
+        .lock-btn {
+          background: transparent; border: 0.5px solid var(--gold); color: var(--gold);
+          font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; letter-spacing: 0.15em;
+          text-transform: uppercase; padding: 0.85rem; border-radius: 6px; cursor: pointer;
+          transition: all 0.2s;
+        }
+        .lock-btn:hover { background: var(--gold); color: #0d0d0d; }
+        .lock-error {
+          font-size: 0.72rem; color: #f87171; text-align: center; letter-spacing: 0.05em;
+          animation: fadeIn 0.2s ease;
+        }
       `}</style>
+
+      {!unlocked ? (
+        <div className="lock-screen">
+          <div className="lock-icon">🔒</div>
+          <div className="lock-label">Access Required</div>
+          <div className="lock-title">Enter the password to continue</div>
+          <form className="lock-form" onSubmit={handlePassword}>
+            <input
+              className="lock-input"
+              type="password"
+              placeholder="••••••••••"
+              value={passwordInput}
+              onChange={e => { setPasswordInput(e.target.value); setPasswordError(false) }}
+              autoFocus
+            />
+            <button className="lock-btn" type="submit">[Enter] Unlock</button>
+            {passwordError && <div className="lock-error">&gt; Incorrect password. Try again.</div>}
+          </form>
+        </div>
+      ) : (
 
       <div className="page">
         <div className="terminal-wrapper">
@@ -541,6 +609,7 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
           </div>
         </div>
       </div>
+      )}
     </>
   )
 }
