@@ -186,6 +186,9 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
   const [visibleLines, setVisibleLines] = useState<string[]>([])
   const [showPrompt, setShowPrompt] = useState(false)
   const [answer, setAnswer] = useState<'yes' | 'no' | null>(null)
+  const [statusLines, setStatusLines] = useState<string[]>([])
+  const [showMessageBtn, setShowMessageBtn] = useState(false)
+  const [showMessage, setShowMessage] = useState(false)
   const [letterLines, setLetterLines] = useState<string[]>([])
   const [noPos, setNoPos] = useState<{ x: number; y: number } | null>(null)
   const terminalRef = useRef<HTMLDivElement>(null)
@@ -301,18 +304,39 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
   const handleAnswer = (choice: 'yes' | 'no') => {
     setAnswer(choice)
     if (choice === 'yes') {
-      const letter = LETTERS[slug] ?? []
+      const STATUS = [
+        '// STATUS UPDATE',
+        `groomsman.exe —`,
+        `  user: "${person.firstName}"`,
+        `  status: ACCEPTED ✓`,
+        `  role: "groomsman"`,
+        `  wedding: "2027-07-16"`,
+      ]
       let i = 0
-      const interval = setInterval(() => {
-        if (i < letter.length) {
-          const line = letter[i]
-          i++
-          setLetterLines(prev => [...prev, line])
+      const statusInterval = setInterval(() => {
+        if (i < STATUS.length) {
+          const line = STATUS[i]; i++
+          setStatusLines(prev => [...prev, line])
         } else {
-          clearInterval(interval)
+          clearInterval(statusInterval)
+          setTimeout(() => setShowMessageBtn(true), 600)
         }
-      }, 120)
+      }, 180)
     }
+  }
+
+  const handleShowMessage = () => {
+    setShowMessage(true)
+    const letter = LETTERS[slug] ?? []
+    let i = 0
+    const interval = setInterval(() => {
+      if (i < letter.length) {
+        const line = letter[i]; i++
+        setLetterLines(prev => [...prev, line])
+      } else {
+        clearInterval(interval)
+      }
+    }, 120)
   }
 
   const lineClass = (line: string) => {
@@ -706,38 +730,46 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
                 <div className="line ok">&gt; Response received: YES ✓</div>
                 <div className="line ok">&gt; groomsman[{SLUGS.indexOf(slug) + 1}] = &quot;{person.name}&quot; — CONFIRMED</div>
                 <div className="line ok">&gt; Wedding party updated successfully.</div>
-                <div style={{
-                  margin: '1.2rem 0',
-                  padding: '1rem',
-                  border: '0.5px solid var(--green)',
-                  borderRadius: '6px',
-                  background: 'rgba(74,222,128,0.04)',
-                }}>
-                  <div className="line ok" style={{ fontSize: '0.7rem', marginBottom: '0.5rem' }}>// STATUS UPDATE</div>
-                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(1rem, 3vw, 1.3rem)', color: 'var(--green)', lineHeight: 1.4 }}>
-                    groomsman.exe —<br />
-                    &nbsp;&nbsp;user: <span style={{ color: 'var(--text)' }}>&quot;{person.firstName}&quot;</span><br />
-                    &nbsp;&nbsp;status: <span style={{ color: 'var(--green)' }}>ACCEPTED ✓</span><br />
-                    &nbsp;&nbsp;role: <span style={{ color: 'var(--gold)' }}>&quot;groomsman&quot;</span><br />
-                    &nbsp;&nbsp;wedding: <span style={{ color: 'var(--text)' }}>&quot;2027-07-16&quot;</span>
+
+                {statusLines.length > 0 && (
+                  <div style={{ margin: '1.2rem 0', padding: '1rem', border: '0.5px solid var(--green)', borderRadius: '6px', background: 'rgba(74,222,128,0.04)' }}>
+                    {statusLines.map((line, i) => (
+                      <div key={i} className="line" style={{
+                        fontSize: i === 0 ? '0.7rem' : 'clamp(0.85rem, 2.5vw, 1.1rem)',
+                        color: line.includes('ACCEPTED') ? 'var(--green)' : line.includes('role') ? 'var(--gold)' : i === 0 ? 'var(--muted)' : 'var(--green)',
+                        animation: 'fadeIn 0.2s ease',
+                      }}>
+                        {line}
+                      </div>
+                    ))}
                   </div>
-                </div>
-                {letterLines.length > 0 && (
+                )}
+
+                {showMessageBtn && !showMessage && (
+                  <button
+                    onClick={handleShowMessage}
+                    className="btn btn-yes"
+                    style={{ marginTop: '0.5rem', width: '100%', animation: 'fadeIn 0.4s ease' }}
+                  >
+                    &gt; open message.txt
+                  </button>
+                )}
+
+                {showMessage && letterLines.length > 0 && (
                   <div style={{ marginTop: '1rem', borderTop: '0.5px solid var(--border)', paddingTop: '1rem' }}>
                     {letterLines.map((line, i) => (
                       <div key={i} className={`line ${
                         i === 0 ? 'cmd' :
-                        line.startsWith('#') ? 'ok' :
                         line.startsWith('─') ? 'dim' :
                         line.startsWith('//') ? 'dim' :
-                        line.startsWith('— ') ? 'cmd' :
-                        line === '' ? '' : ''
+                        line.startsWith('— ') ? 'cmd' : ''
                       }`}>
                         {i === 0 ? `> ${line}` : line.startsWith('─') ? line : line === '' ? '' : `  ${line}`}
                       </div>
                     ))}
                   </div>
                 )}
+
                 <div className="line dim" style={{ marginTop: '1rem' }}>// Kenny &amp; Jeanne · July 16, 2027</div>
               </div>
             )}
