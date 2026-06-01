@@ -232,6 +232,7 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
   }, [])
 
   useEffect(() => {
+    if (!unlocked) return
     let i = 0
     const interval = setInterval(() => {
       if (i < person.lines.length) {
@@ -244,7 +245,7 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
       }
     }, 420)
     return () => clearInterval(interval)
-  }, [person.lines])
+  }, [unlocked, person.lines])
 
   useEffect(() => {
     if (terminalRef.current) {
