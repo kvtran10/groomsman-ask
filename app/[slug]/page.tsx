@@ -3,6 +3,84 @@ import { use, useState, useEffect, useRef } from 'react'
 import confetti from 'canvas-confetti'
 import { notFound } from 'next/navigation'
 
+const LETTERS: Record<string, string[]> = {
+  'favian-tong': [
+    'cat letter.txt',
+    '─────────────────────────────────────────',
+    'Favian,',
+    '',
+    'This is a placeholder letter for Favian.',
+    'Write something personal here about your',
+    'friendship, memories, and what it means',
+    'to have him stand by your side.',
+    '',
+    'He\'ll love it.',
+    '',
+    '— Kenny',
+    '─────────────────────────────────────────',
+  ],
+  'kenneth-le': [
+    'cat letter.txt',
+    '─────────────────────────────────────────',
+    'Kenneth,',
+    '',
+    'This is a placeholder letter for Kenneth.',
+    'Write something personal here about your',
+    'friendship, memories, and what it means',
+    'to have him stand by your side.',
+    '',
+    'He\'ll love it.',
+    '',
+    '— Kenny',
+    '─────────────────────────────────────────',
+  ],
+  'kevin-mai': [
+    'cat letter.txt',
+    '─────────────────────────────────────────',
+    'Kevin,',
+    '',
+    'This is a placeholder letter for Kevin Mai.',
+    'Write something personal here about your',
+    'friendship, memories, and what it means',
+    'to have him stand by your side.',
+    '',
+    'He\'ll love it.',
+    '',
+    '— Kenny',
+    '─────────────────────────────────────────',
+  ],
+  'kevin-nguyen': [
+    'cat letter.txt',
+    '─────────────────────────────────────────',
+    'Kevin,',
+    '',
+    'This is a placeholder letter for Kevin Nguyen.',
+    'Write something personal here about your',
+    'friendship, memories, and what it means',
+    'to have him stand by your side.',
+    '',
+    'He\'ll love it.',
+    '',
+    '— Kenny',
+    '─────────────────────────────────────────',
+  ],
+  'khoi-le': [
+    'cat letter.txt',
+    '─────────────────────────────────────────',
+    'Khoi,',
+    '',
+    'This is a placeholder letter for Khoi.',
+    'Write something personal here about your',
+    'friendship, memories, and what it means',
+    'to have him stand by your side.',
+    '',
+    'He\'ll love it.',
+    '',
+    '— Kenny',
+    '─────────────────────────────────────────',
+  ],
+}
+
 const GROOMSMEN: Record<string, { name: string; firstName: string; lines: string[] }> = {
   'favian-tong': {
     name: 'Favian Tong',
@@ -92,11 +170,13 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
   const [visibleLines, setVisibleLines] = useState<string[]>([])
   const [showPrompt, setShowPrompt] = useState(false)
   const [answer, setAnswer] = useState<'yes' | 'no' | null>(null)
+  const [letterLines, setLetterLines] = useState<string[]>([])
   const [noPos, setNoPos] = useState<{ x: number; y: number } | null>(null)
   const terminalRef = useRef<HTMLDivElement>(null)
   const noBtnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
+    const isTouchDevice = () => window.matchMedia('(pointer: coarse)').matches
     const flee = (clientX: number, clientY: number) => {
       const btn = noBtnRef.current
       if (!btn) return
@@ -106,11 +186,13 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
       const dx = clientX - cx
       const dy = clientY - cy
       const dist = Math.sqrt(dx * dx + dy * dy)
-      if (dist < 120) {
+      const triggerDist = isTouchDevice() ? 180 : 120
+      const fleeDist   = isTouchDevice() ? 260 : 160
+      const pad        = isTouchDevice() ?  48 :  60
+      if (dist < triggerDist) {
         const angle = Math.atan2(dy, dx)
-        let nx = rect.left - Math.cos(angle) * 160
-        let ny = rect.top  - Math.sin(angle) * 160
-        const pad = 60
+        let nx = rect.left - Math.cos(angle) * fleeDist
+        let ny = rect.top  - Math.sin(angle) * fleeDist
         nx = Math.max(pad, Math.min(window.innerWidth  - rect.width  - pad, nx))
         ny = Math.max(pad, Math.min(window.innerHeight - rect.height - pad, ny))
         setNoPos({ x: nx, y: ny })
@@ -121,11 +203,17 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
       const t = e.touches[0]
       if (t) flee(t.clientX, t.clientY)
     }
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0]
+      if (t) flee(t.clientX, t.clientY)
+    }
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('touchmove', onTouchMove, { passive: true })
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
     return () => {
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchstart', onTouchStart)
     }
   }, [])
 
@@ -159,7 +247,20 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
 
   const handleAnswer = (choice: 'yes' | 'no') => {
     setAnswer(choice)
-    if (choice === 'yes') fireConfetti()
+    if (choice === 'yes') {
+      fireConfetti()
+      const letter = LETTERS[slug] ?? []
+      let i = 0
+      const interval = setInterval(() => {
+        if (i < letter.length) {
+          const line = letter[i]
+          i++
+          setLetterLines(prev => [...prev, line])
+        } else {
+          clearInterval(interval)
+        }
+      }, 120)
+    }
   }
 
   const lineClass = (line: string) => {
@@ -394,7 +495,7 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
                       cursor: 'none',
                       userSelect: 'none',
                       WebkitUserSelect: 'none',
-                      transition: 'left 0.15s ease, top 0.15s ease',
+                      transition: 'left 0.08s ease, top 0.08s ease',
                     } : {
                       userSelect: 'none',
                       WebkitUserSelect: 'none',
@@ -412,12 +513,17 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
                 <div className="line ok">&gt; groomsman[{SLUGS.indexOf(slug) + 1}] = &quot;{person.name}&quot; — CONFIRMED</div>
                 <div className="line ok">&gt; Wedding party updated successfully.</div>
                 <div className="big">Let&apos;s get it, {person.firstName}!</div>
-                <div className="msg">
-                  You&apos;re officially locked in as one of my groomsmen.<br />
-                  It means everything having you by my side on July 16th.<br />
-                  More details coming your way soon — stay tuned. 🤙
-                </div>
-                <div className="date-line">Kenny &amp; Jeanne · July 16, 2027</div>
+                {letterLines.length > 0 && (
+                  <div style={{ marginTop: '1.5rem', borderTop: '0.5px solid var(--border)', paddingTop: '1.5rem' }}>
+                    {letterLines.map((line, i) => (
+                      <div key={i} className={`line ${i === 0 ? 'cmd' : line.startsWith('─') ? 'dim' : line === '' ? '' : 'letter-line'}`}
+                        style={i === 0 ? {} : { color: line.startsWith('─') ? 'var(--muted)' : line.startsWith('—') ? 'var(--gold)' : 'var(--text)', fontFamily: line.startsWith('─') ? undefined : "'Cormorant Garamond', serif", fontSize: line.startsWith('─') ? '0.75rem' : '1.05rem', lineHeight: '1.9' }}>
+                        {i === 0 ? `> ${line}` : line}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="date-line" style={{ marginTop: '1.5rem' }}>Kenny &amp; Jeanne · July 16, 2027</div>
               </div>
             )}
 
