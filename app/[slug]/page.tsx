@@ -1,6 +1,5 @@
 'use client'
 import { use, useState, useEffect, useRef } from 'react'
-import confetti from 'canvas-confetti'
 import { notFound } from 'next/navigation'
 
 const LETTERS: Record<string, string[]> = {
@@ -304,17 +303,9 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
     }
   }, [visibleLines, showPrompt, answer])
 
-  const fireConfetti = () => {
-    const colors = ['#c9a96e', '#d4c5a9', '#f0e8d8', '#b5a48a', '#fff8e7', '#e8c97a', '#ffffff']
-    confetti({ particleCount: 200, spread: 160, origin: { x: 0.5, y: 0.6 }, colors, scalar: 2, ticks: 300, startVelocity: 60, gravity: 0.8 })
-    confetti({ particleCount: 150, angle: 60,  spread: 80, origin: { x: 0, y: 0.7 }, colors, scalar: 2, startVelocity: 70, ticks: 300 })
-    confetti({ particleCount: 150, angle: 120, spread: 80, origin: { x: 1, y: 0.7 }, colors, scalar: 2, startVelocity: 70, ticks: 300 })
-  }
-
   const handleAnswer = (choice: 'yes' | 'no') => {
     setAnswer(choice)
     if (choice === 'yes') {
-      fireConfetti()
       const letter = LETTERS[slug] ?? []
       let i = 0
       const interval = setInterval(() => {
