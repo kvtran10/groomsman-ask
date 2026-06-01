@@ -168,6 +168,7 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
   if (!person) notFound()
 
   const [unlocked, setUnlocked] = useState(false)
+  const matrixCanvasRef = useRef<HTMLCanvasElement>(null)
   const [passwordInput, setPasswordInput] = useState('')
   const [passwordError, setPasswordError] = useState(false)
   const [visibleLines, setVisibleLines] = useState<string[]>([])
@@ -177,6 +178,38 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
   const [noPos, setNoPos] = useState<{ x: number; y: number } | null>(null)
   const terminalRef = useRef<HTMLDivElement>(null)
   const noBtnRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (answer !== 'yes') return
+    const canvas = matrixCanvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    canvas.width  = window.innerWidth
+    canvas.height = window.innerHeight
+    const cols = Math.floor(canvas.width / 16)
+    const drops = Array(cols).fill(1)
+    const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF'
+    const draw = () => {
+      ctx.fillStyle = 'rgba(0,0,0,0.05)'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.fillStyle = '#00ff41'
+      ctx.font = '14px monospace'
+      drops.forEach((y, i) => {
+        const char = chars[Math.floor(Math.random() * chars.length)]
+        ctx.fillText(char, i * 16, y * 16)
+        if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0
+        drops[i]++
+      })
+    }
+    const id = setInterval(draw, 40)
+    const onResize = () => {
+      canvas.width  = window.innerWidth
+      canvas.height = window.innerHeight
+    }
+    window.addEventListener('resize', onResize)
+    return () => { clearInterval(id); window.removeEventListener('resize', onResize) }
+  }, [answer])
 
   const handlePassword = (e: React.FormEvent) => {
     e.preventDefault()
@@ -574,6 +607,10 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
                   </button>
                 </div>
               </div>
+            )}
+
+            {answer === 'yes' && (
+              <canvas ref={matrixCanvasRef} style={{ position: 'fixed', inset: 0, zIndex: -1, opacity: 0.18, pointerEvents: 'none' }} />
             )}
 
             {answer === 'yes' && (
