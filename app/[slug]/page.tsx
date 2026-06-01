@@ -4,76 +4,71 @@ import { notFound } from 'next/navigation'
 
 const LETTERS: Record<string, string[]> = {
   'favian-tong': [
-    'cat letter.txt',
+    'cat message.txt',
     '─────────────────────────────────────────',
+    '// TO: favian_tong',
+    '// FROM: kenny_tran',
+    '─────────────────────────────────────────',
+    '',
     'Favian,',
     '',
-    'This is a placeholder letter for Favian.',
-    'Write something personal here about your',
-    'friendship, memories, and what it means',
-    'to have him stand by your side.',
-    '',
-    'He\'ll love it.',
+    '[ placeholder — write your message here ]',
     '',
     '— Kenny',
     '─────────────────────────────────────────',
   ],
   'kenneth-le': [
-    'cat letter.txt',
+    'cat message.txt',
     '─────────────────────────────────────────',
+    '// TO: kenneth_le',
+    '// FROM: kenny_tran',
+    '─────────────────────────────────────────',
+    '',
     'Kenneth,',
     '',
-    'This is a placeholder letter for Kenneth.',
-    'Write something personal here about your',
-    'friendship, memories, and what it means',
-    'to have him stand by your side.',
-    '',
-    'He\'ll love it.',
+    '[ placeholder — write your message here ]',
     '',
     '— Kenny',
     '─────────────────────────────────────────',
   ],
   'kevin-mai': [
-    'cat letter.txt',
+    'cat message.txt',
     '─────────────────────────────────────────',
+    '// TO: kevin_mai',
+    '// FROM: kenny_tran',
+    '─────────────────────────────────────────',
+    '',
     'Kevin,',
     '',
-    'This is a placeholder letter for Kevin Mai.',
-    'Write something personal here about your',
-    'friendship, memories, and what it means',
-    'to have him stand by your side.',
-    '',
-    'He\'ll love it.',
+    '[ placeholder — write your message here ]',
     '',
     '— Kenny',
     '─────────────────────────────────────────',
   ],
   'kevin-nguyen': [
-    'cat letter.txt',
+    'cat message.txt',
     '─────────────────────────────────────────',
+    '// TO: kevin_nguyen',
+    '// FROM: kenny_tran',
+    '─────────────────────────────────────────',
+    '',
     'Kevin,',
     '',
-    'This is a placeholder letter for Kevin Nguyen.',
-    'Write something personal here about your',
-    'friendship, memories, and what it means',
-    'to have him stand by your side.',
-    '',
-    'He\'ll love it.',
+    '[ placeholder — write your message here ]',
     '',
     '— Kenny',
     '─────────────────────────────────────────',
   ],
   'khoi-le': [
-    'cat letter.txt',
+    'cat message.txt',
     '─────────────────────────────────────────',
+    '// TO: khoi_le',
+    '// FROM: kenny_tran',
+    '─────────────────────────────────────────',
+    '',
     'Khoi,',
     '',
-    'This is a placeholder letter for Khoi.',
-    'Write something personal here about your',
-    'friendship, memories, and what it means',
-    'to have him stand by your side.',
-    '',
-    'He\'ll love it.',
+    '[ placeholder — write your message here ]',
     '',
     '— Kenny',
     '─────────────────────────────────────────',
@@ -713,16 +708,22 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
                 <div className="line ok">&gt; Wedding party updated successfully.</div>
                 <div className="big">Let&apos;s get it, {person.firstName}!</div>
                 {letterLines.length > 0 && (
-                  <div style={{ marginTop: '1.5rem', borderTop: '0.5px solid var(--border)', paddingTop: '1.5rem' }}>
+                  <div style={{ marginTop: '1rem', borderTop: '0.5px solid var(--border)', paddingTop: '1rem' }}>
                     {letterLines.map((line, i) => (
-                      <div key={i} className={`line ${i === 0 ? 'cmd' : line.startsWith('─') ? 'dim' : line === '' ? '' : 'letter-line'}`}
-                        style={i === 0 ? {} : { color: line.startsWith('─') ? 'var(--muted)' : line.startsWith('—') ? 'var(--gold)' : 'var(--text)', fontFamily: line.startsWith('─') ? undefined : "'Cormorant Garamond', serif", fontSize: line.startsWith('─') ? '0.75rem' : '1.05rem', lineHeight: '1.9' }}>
-                        {i === 0 ? `> ${line}` : line}
+                      <div key={i} className={`line ${
+                        i === 0 ? 'cmd' :
+                        line.startsWith('#') ? 'ok' :
+                        line.startsWith('─') ? 'dim' :
+                        line.startsWith('//') ? 'dim' :
+                        line.startsWith('— ') ? 'cmd' :
+                        line === '' ? '' : ''
+                      }`}>
+                        {i === 0 ? `> ${line}` : line.startsWith('─') ? line : line === '' ? '' : `  ${line}`}
                       </div>
                     ))}
                   </div>
                 )}
-                <div className="date-line" style={{ marginTop: '1.5rem' }}>Kenny &amp; Jeanne · July 16, 2027</div>
+                <div className="line dim" style={{ marginTop: '1rem' }}>// Kenny &amp; Jeanne · July 16, 2027</div>
               </div>
             )}
 
