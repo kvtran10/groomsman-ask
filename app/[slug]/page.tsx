@@ -706,7 +706,22 @@ export default function GroomsmanPage({ params }: { params: Promise<{ slug: stri
                 <div className="line ok">&gt; Response received: YES ✓</div>
                 <div className="line ok">&gt; groomsman[{SLUGS.indexOf(slug) + 1}] = &quot;{person.name}&quot; — CONFIRMED</div>
                 <div className="line ok">&gt; Wedding party updated successfully.</div>
-                <div className="big">Let&apos;s get it, {person.firstName}!</div>
+                <div style={{
+                  margin: '1.2rem 0',
+                  padding: '1rem',
+                  border: '0.5px solid var(--green)',
+                  borderRadius: '6px',
+                  background: 'rgba(74,222,128,0.04)',
+                }}>
+                  <div className="line ok" style={{ fontSize: '0.7rem', marginBottom: '0.5rem' }}>// STATUS UPDATE</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(1rem, 3vw, 1.3rem)', color: 'var(--green)', lineHeight: 1.4 }}>
+                    groomsman.exe —<br />
+                    &nbsp;&nbsp;user: <span style={{ color: 'var(--text)' }}>&quot;{person.firstName}&quot;</span><br />
+                    &nbsp;&nbsp;status: <span style={{ color: 'var(--green)' }}>ACCEPTED ✓</span><br />
+                    &nbsp;&nbsp;role: <span style={{ color: 'var(--gold)' }}>&quot;groomsman&quot;</span><br />
+                    &nbsp;&nbsp;wedding: <span style={{ color: 'var(--text)' }}>&quot;2027-07-16&quot;</span>
+                  </div>
+                </div>
                 {letterLines.length > 0 && (
                   <div style={{ marginTop: '1rem', borderTop: '0.5px solid var(--border)', paddingTop: '1rem' }}>
                     {letterLines.map((line, i) => (
